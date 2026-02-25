@@ -2,30 +2,45 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout') {
             steps {
-                checkout scm
+                git 'https://github.com/SandhiyaDevi-2002/Docker-Demo.git'
             }
         }
 
-        stage('Build') {
+        stage('Build Jar') {
             steps {
-                echo 'Build Stage Running'
+                powershell 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Docker Image Build Stage'
-                bat 'docker build -t docker-demo .'
+                powershell 'docker build -t docker-demo .'
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                powershell 'docker stop docker-demo 2>$null || exit 0'
+                powershell 'docker rm docker-demo 2>$null || exit 0'
             }
         }
 
         stage('Run Container') {
             steps {
-                echo 'Running Docker Container'
-                bat 'docker run -d -p 8080:8080 docker-demo'
+                powershell 'docker run -d -p 8081:8080 --name docker-demo docker-demo'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed'
         }
     }
 }
