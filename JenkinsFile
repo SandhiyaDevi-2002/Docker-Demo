@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/SandhiyaDevi-2002/Docker-Demo.git'
+            }
+        }
+
+        stage('Build Jar') {
+            steps {
+                bat 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t docker-demo .'
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                bat 'docker stop docker-demo || exit 0'
+                bat 'docker rm docker-demo || exit 0'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                bat 'docker run -d -p 8081:8080 --name docker-demo docker-demo'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
+}
