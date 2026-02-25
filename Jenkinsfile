@@ -2,50 +2,30 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
-                git 'https://github.com/SandhiyaDevi-2002/Docker-Demo.git'
+                git branch: 'master',
+                    url: 'https://github.com/SandhiyaDevi-2002/Docker-Demo.git',
+                    credentialsId: 'github'
             }
         }
 
-        stage('Build Jar') {
+        stage('Build JAR') {
             steps {
-                powershell 'mvn clean package -DskipTests'
+                bat 'mvnw.cmd clean package'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                powershell 'docker build -t docker-demo .'
-            }
-        }
-
-        stage('Stop Old Container') {
-            steps {
-                powershell '''
-                docker ps -a --format "{{.Names}}" | Select-String "^docker-demo$"
-                if ($?) {
-                    docker stop docker-demo
-                    docker rm docker-demo
-                }
-                '''
+                bat 'docker build -t springboot-jenkins-demo .'
             }
         }
 
         stage('Run Container') {
             steps {
-                powershell 'docker run -d -p 8082:8082 --name docker-demo docker-demo'
+                bat 'docker run -d -p 8082:8082 springboot-jenkins-demo'
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed'
         }
     }
 }
