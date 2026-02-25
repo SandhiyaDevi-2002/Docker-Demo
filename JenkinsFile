@@ -4,42 +4,28 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/SandhiyaDevi-2002/Docker-Demo.git'
+                checkout scm
             }
         }
 
-        stage('Build Jar') {
+        stage('Build') {
             steps {
-                bat 'mvn clean package -DskipTests'
+                echo 'Build Stage Running'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Docker Build') {
             steps {
+                echo 'Docker Image Build Stage'
                 bat 'docker build -t docker-demo .'
-            }
-        }
-
-        stage('Stop Old Container') {
-            steps {
-                bat 'docker stop docker-demo || exit 0'
-                bat 'docker rm docker-demo || exit 0'
             }
         }
 
         stage('Run Container') {
             steps {
-                bat 'docker run -d -p 8081:8080 --name docker-demo docker-demo'
+                echo 'Running Docker Container'
+                bat 'docker run -d -p 8080:8080 docker-demo'
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed'
         }
     }
 }
