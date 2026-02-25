@@ -23,14 +23,19 @@ pipeline {
 
         stage('Stop Old Container') {
             steps {
-                powershell 'docker stop docker-demo 2>$null || exit 0'
-                powershell 'docker rm docker-demo 2>$null || exit 0'
+                powershell '''
+                docker ps -a --format "{{.Names}}" | Select-String "^docker-demo$"
+                if ($?) {
+                    docker stop docker-demo
+                    docker rm docker-demo
+                }
+                '''
             }
         }
 
         stage('Run Container') {
             steps {
-                powershell 'docker run -d -p 8081:8080 --name docker-demo docker-demo'
+                powershell 'docker run -d -p 8082:8082 --name docker-demo docker-demo'
             }
         }
     }
